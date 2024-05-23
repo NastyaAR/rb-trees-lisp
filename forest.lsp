@@ -1,3 +1,19 @@
+;class node of tree
+;fields: val (integer) - value
+;        color (string) - color of node (red/black)
+;        children (list node*) - list of children
+;        root (node) - parent node
+;methods: tored
+;         toblack
+;         print-object
+;         get_left_child
+;         get_right_child
+;         set_left_child
+;         set_right_child
+;         set_root
+;         tolistik
+;         islistik
+;         is_root
 (defclass node ()
     (
         (val :accessor val)
@@ -7,51 +23,105 @@
     )
 )
 
+
+;method tored on node class
+;desc: change node color to red
+;params: object - src node
+;return: node
 (defmethod tored ((object node))
    (and (setf (color object) "red") object)
 )
 
+;method toblack on node class
+;desc: change node color to black
+;params: object - src node
+;return node
 (defmethod toblack ((object node))
    (and (setf (color object) "black") object)
 )
 
+;method print-object on node class
+;desc: print node in human-readable view
+;params: object - src node
 (defmethod print-object ((object node) out)
     (print-unreadable-object (object out :type t)
         (format out "color=~s val=~d" (color object) (val object)))
 )
 
+;method get_left_child on node class
+;desc: get left child of tree node
+;params: object - src node
+;return: node
 (defmethod get_left_child ((object node))
     (car (children object))
 )
 
+;method get_right_child on node class
+;desc: get right child of tree node
+;params: object - src node
+;return: node
 (defmethod get_right_child ((object node))
     (cadr (children object))
 )
 
+;method set_left_child on node class
+;desc: set new_val node as left child of parent object node
+;params: object - src node
+;        new_val - new left child node
+;return: node
 (defmethod set_left_child ((object node) new_val)
     (rplaca (children object) new_val)
 )
 
+;method set_right_child on node class
+;desc: set new_val node as right child of parent object node
+;params: object - src node
+;        new_val - new right child node
+;return: node
 (defmethod set_right_child ((object node) new_val)
     (rplacd (children object) (list new_val))
 )
 
+;method set_root on node class
+;desc: set parent as new root of object node
+;params: object - src node
+;        parent - new parent node
+;return node
 (defmethod set_root ((object node) parent)
     (and (setf (root object) parent) object)
 )
 
+;method tolistik on node class
+;desc: make list from tree node
+;params: object - src node
+;return: node
 (defmethod tolistik ((object node))
     (and (rplaca (children object) nil) (rplacd (children object) nil))
 )
 
+;method islistik on node class
+;desc: list check of node
+;params: object - src node
+;return: T - object is tree list
+;        Nil - object isnt tree list
 (defmethod islistik ((object node))
     (and (null (car (children object))) (null (cadr (children object))))
 )
 
+;method is_root on node class
+;desc: root check of node
+;params: object - src node
+;return: T - object is tree root
+;        Nil - object isnt tree root
 (defmethod is_root ((object node))
     (null (root object))
 )
 
+;method insert
+;desc: insert node to binary rb tree
+;params: root - node that is root of tree
+;        item - insert node
+;return: node
 (defun insert (root item)
     (cond ((and (< (val item) (val root)) (null (car (children root)))) (and (set_left_child root item) (set_root item root)))
           ((and (< (val item) (val root))) (insert (car (children root)) item))
@@ -60,6 +130,10 @@
     )
 )
 
+;method left_turn
+;desc: make a large left turn of the tree
+;params: parent - node around which the rotation is made
+;return: node
 (defun left_turn (parent) 
     (let* (
             (new_parent (copy-tree (get_right_child parent)))
@@ -83,7 +157,10 @@
     )
 )
 
-
+;mathod right turn
+;desc: make a large right turn of the tree
+;params: parent - node around which the rotation is made
+;return: node
 (defun right_turn (parent)
     (let* (
             (new_parent     (copy-tree (get_left_child parent)))
@@ -106,6 +183,10 @@
     )
 )
 
+;method small_left_turn
+;desc: make a small left turn of the tree
+;params: parent - node around which the rotation is made
+;return: node
 (defun small_left_turn (parent)
     (let*   (
                 (left_child     (copy-tree (get_left_child parent)))
@@ -120,6 +201,10 @@
         )
 )
 
+;method small_right_turn
+;desc: make a small right turn of the tree
+;params: parent - node around which the rotation is made
+;return: node
 (defun small_right_turn (parent)
     (let* (
                 (right_child   (copy-tree (get_right_child parent)))
@@ -133,6 +218,10 @@
     )
 )
 
+;method swap_color_red_up
+;desc: make a swap of colors when there is a red node at the top
+;params: parent - parent node of swapping
+;return: node
 (defun swap_color_red_up (parent)
     (let* ((cur_parent (car parent))
            (left (caadr parent))
@@ -146,6 +235,10 @@
     )
 )
 
+;method swap_color_black_up
+;desc: make a swap of colors when there is a black node at the top
+;params: parent - parent node of swapping
+;return: node
 (defun swap_color_black_up (parent)
     (let* ((cur_parent (car parent))
            (left (caadr parent))
@@ -159,6 +252,9 @@
     )
 )
 
+;method print_tree
+;desc: recursive print of tree
+;params: parent - root of tree
 (defun print_tree (parent)
     (cond ((null parent) 1)
           ((islistik parent) (print parent))
@@ -166,6 +262,11 @@
     )
 )
 
+;method case1
+;desc: first case for balancing
+;params: parent - current root of tree
+;return: T - first case was realized
+;        Nil - first case wasnt realized
 (defun case1 (parent)
     (let* ((son1        (get_left_child parent))
            (uncle_son2    (get_right_child parent))
@@ -181,6 +282,11 @@
     )
 )
 
+;method case2_left
+;desc: second left case for balancing
+;params: parent - current root of tree
+;return: T - second left case was realized
+;        Nil - second left case wasnt realized
 (defun case2_left (parent)
     (let* ((uncle_son2         (get_right_child parent))
            (grandson    (cadr (children (get_left_child parent))))
@@ -198,6 +304,11 @@
     )
 )
 
+;method case2_right
+;desc: second right case for balancing
+;params: parent - current root of tree
+;return: T - second right case was realized
+;        Nil - second right case wasnt realized
 (defun case2_right (parent)
     (let* ((son1        (get_right_child parent))
            (grandson        (car (children (get_right_child parent))))
@@ -215,8 +326,11 @@
     )
 )
 
-
-
+;method case3_left
+;desc: third left case for balancing
+;params: parent - current root of tree
+;return: T - third left case was realized
+;        Nil - third left case wasnt realized
 (defun case3_left (parent)
     (let* ((son1          (get_left_child parent))
            (uncle_son2    (get_right_child parent))
@@ -235,6 +349,11 @@
     )
 )
 
+;method case3_right
+;desc: third right case for balancing
+;params: parent - current root of tree
+;return: T - third right case was realized
+;        Nil - third right case wasnt realized
 (defun case3_right (parent)
     (let* ((son1        (get_right_child parent))
            (uncle_son2  (get_left_child parent))
@@ -252,33 +371,56 @@
     )
 )
 
-
+;method case1_impl
+;desc: balancing in the first case
+;params: parent - current root of tree
+;return: node
 (defun case1_impl (parent)
     (cond ((is_root parent) (swap_color_red_up parent))
           (T (and (swap_color_red_up parent) (balance_tree nil (root parent))))
     )
 )
 
+;method case2_impl_left
+;desc: balancing in the second left case
+;params: parent - current root of tree
+;return: node
 (defun case2_impl_left (parent)
     (cond ((is_root parent)  (toblack (right_turn (small_left_turn parent))))
           (T (and (right_turn (small_left_turn parent)) (balance_tree (root parent)))))
 )
 
+;method case2_impl_right
+;desc: balancing in the second right case
+;params: parent - current root of tree
+;return: node
 (defun case2_impl_right (parent)
     (cond ((is_root parent) (toblack (left_turn (small_right_turn parent))))
           (T (and (left_turn (small_right_turn parent)) (balance_tree (root parent)))))
 )
 
+;method case3_impl_left
+;desc: balancing in the third left case
+;params: parent - current root of tree
+;return: node
 (defun case3_impl_left (parent)
     (cond ((is_root parent) (toblack (left_turn parent)))
           (T (and (left_turn parent) (balance_tree (root parent)))))
 )
 
+;method case3_impl_right
+;desc: balancing in the third right case
+;params: parent - current root of tree
+;return: node
 (defun case3_impl_right (parent)
     (cond ((is_root parent) (toblack (right_turn parent)))
           (T (and (right_turn parent) (balance_tree (root parent)))))
 )
 
+;method balance_tree
+;desc: recursive balancing of rb tree
+;params: parent - initial node of balancing
+;return: node
 (defun balance_tree (parent)
     (cond 
             ; ((and (null root) (null parent)))
@@ -298,6 +440,9 @@
     )
 )
 
+;method depth_trav
+;desc: recursive depth-first traversal with balancing
+;params: parent - root node of tree
 (defun depth_trav (parent)
     (cond 
             ((null parent) 1)
@@ -306,6 +451,10 @@
     )
 )
 
+;method merge_tree
+;desc: merging to rb binary trees
+;params: src - root of source tree
+;        dest - root of destination tree
 (defun merge_tree (src dst)
     (cond ((null src) 1)
           ((islistik src) (and (insert dst (tored src)) (balance_tree dst)))
