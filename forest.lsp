@@ -254,7 +254,7 @@
         )
 
             (setf (root lr_grand) parent)
-            (setf (cdr (children parent)) lr_grand)
+            (setf (car (children parent)) lr_grand)
 
             (setf (root left_son) (root tmp_parent))
             
@@ -263,7 +263,7 @@
                   (T (setf (cdr (children (root tmp_parent))) left_son)))
 
             (setf (root parent) left_son)
-            (setf (car (children left_son)) parent)
+            (setf (cdr (children left_son)) parent)
 
             left_son
     )
@@ -497,13 +497,23 @@
     )
 )
 
+(defun case0_impl (parent)
+    (toblack parent)
+)
+
 ;method case1_impl
 ;desc: balancing in the first case
 ;params: parent - current root of tree
 ;return: node
-(defun case1_impl (parent)
-    (cond ((is_root parent) (swap_color_red_up parent))
-          (T (and (swap_color_red_up parent) (balance_tree nil (root parent))))
+(defun case1_impl_left (parent)
+    (cond ((is_root parent) (and (swap_color_red_up parent) (toblack parent)))
+          (T (and (swap_color_red_up parent) (balance_tree (root parent))))
+    )
+)
+
+(defun case1_impl_right (parent)
+    (cond ((is_root parent) (and (swap_color_red_up parent)) (toblack parent))
+          (T (and (swap_color_red_up parent) (balance_tree (root parent))))
     )
 )
 
@@ -513,7 +523,7 @@
 ;return: node
 (defun case2_impl_left (parent)
     (cond ((is_root parent)  (toblack (right_turn (small_left_turn parent))))
-          (T (and (right_turn (small_left_turn parent)) (balance_tree (root parent)))))
+          (T (and ())))
 )
 
 ;method case2_impl_right
@@ -521,8 +531,12 @@
 ;params: parent - current root of tree
 ;return: node
 (defun case2_impl_right (parent)
-    (cond ((is_root parent) (toblack (left_turn (small_right_turn parent))))
-          (T (and (left_turn (small_right_turn parent)) (balance_tree (root parent)))))
+    (let* ((root_of_parent (root parent)))
+        (cond ((is_root parent) (toblack (left_turn (small_right_turn parent))))
+            (T (and (right_turn (get_right_child parent)) (left_turn parent) 
+                    (toblack (get_right_child root_of_parent))
+                    (tored (get_rl_grandson root_of_parent)))))
+    )
 )
 
 ;method case3_impl_left
