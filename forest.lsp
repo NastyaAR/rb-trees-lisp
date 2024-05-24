@@ -205,9 +205,6 @@
 ;desc: make a large left turn of the tree
 ;params: parent - node around which the rotation is made
 ;return: node
-
-
-;!!!!!!!!!!!!!!могут быть траблы, если запускать от отца у которого сын без детей
 (defun left_turn (parent) 
     (let* (
             (tmp_parent (copy-tree parent))
@@ -221,6 +218,7 @@
             (rl_grand     (copy-tree (get_rl_grandson parent)))
             (rr_grand    (copy-tree (get_right_grandson parent)))
           )
+
             (setf (root rl_grand) parent)
             (setf (cdr (children parent)) rl_grand)
 
@@ -232,7 +230,6 @@
 
             (setf (root parent) right_son)
             (setf (car (children right_son)) parent)
-            (print_tree right_son)
 
             right_son
     )
@@ -242,28 +239,33 @@
 ;desc: make a large right turn of the tree
 ;params: parent - node around which the rotation is made
 ;return: node
-
-
-;!!!!!!!!!!!!!!могут быть траблы, если запускать от отца у которого сын без детей
 (defun right_turn (parent)
     (let* (
-            (new_parent     (copy-tree (get_left_child parent)))
-            (child1         (copy-tree (get_left_child (get_left_child parent))))
-            (child2         (tored (copy-tree parent)))
-            (child22        (copy-tree (get_right_child parent)))
-            (child21        (copy-tree (cadr (children (get_left_child parent)))))
-        )
-        ; (print new_parent)
-        ; (print child1)
-        ; (print child2)
-        ; (print child21)
-        ; (print child22)
+            (tmp_parent (copy-tree parent))
+            (tmp_left_son (copy-tree (get_left_child parent)))
+            (tmp_right_son (copy-tree (get_right_child parent)))
+            (tmp_ll_grand (copy-tree (get_left_grandson parent)))
+            (tmp_lr_grand (copy-tree (get_lr_grandson parent)))
 
-        (set_left_child new_parent child1)
-        (set_right_child new_parent child2)
-        (set_left_child child2 child21)
-        (set_right_child child2 child22)
-        new_parent
+            (right_son (copy-tree (get_right_child parent)))
+            (left_son   (copy-tree (get_left_child parent)))
+            (ll_grand     (copy-tree (get_left_grandson parent)))
+            (lr_grand    (copy-tree (get_lr_grandson parent)))
+        )
+
+            (setf (root lr_grand) parent)
+            (setf (cdr (children parent)) lr_grand)
+
+            (setf (root left_son) (root tmp_parent))
+            
+            (cond ((is_root tmp_parent) left_son)
+                  ((equalp (get_left_child (root tmp_parent)) tmp_parent) (setf (car (children (root tmp_parent))) left_son))
+                  (T (setf (cdr (children (root tmp_parent))) left_son)))
+
+            (setf (root parent) left_son)
+            (setf (car (children left_son)) parent)
+
+            left_son
     )
 )
 
@@ -341,6 +343,7 @@
 ;params: parent - root of tree
 (defun print_tree (parent)
     (cond ((null parent) 1)
+          ((isnullnode parent) 1)
           ((islistik parent) (print parent))
           (T (and (print parent) (print (children parent)) (print_tree (car (children parent))) (print_tree (cdr (children parent)))))
     )

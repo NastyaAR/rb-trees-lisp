@@ -382,6 +382,40 @@
   (set_right_child b d)
   (fiveam:is (equalp b (toroot (left_turn r)))))
 
+ (fiveam:test left-turn-normal-parent-and-son-test
+  (setf r (create_node 20 "b"))
+  (setf a (create_node 10 "b"))
+  (setf b (create_node 40 "b"))
+  (setf c (create_node 30 "b"))
+  (setf d (create_node 50 "b"))
+  (set_left_child r a)
+  (set_right_child r b)
+  (set_left_child b c)
+  (set_right_child b d)
+  (fiveam:is (equalp r (toroot (left_turn b)))))
 
+ (fiveam:test right-turn-normal-test
+  (setf r (create_node 20 "b"))
+  (setf a (create_node 10 "b"))
+  (setf b (create_node 40 "b"))
+  (setf c (create_node 5 "b"))
+  (setf d (create_node 15 "b"))
+  (set_left_child r a)
+  (set_right_child r b)
+  (set_left_child a c)
+  (set_right_child a d)
+  (fiveam:is (equalp a (toroot (right_turn r)))))
+
+ (fiveam:test right-turn-normal-parent-and-son-test
+  (setf r (create_node 20 "b"))
+  (setf a (create_node 10 "b"))
+  (setf b (create_node 40 "b"))
+  (setf c (create_node 5 "b"))
+  (setf d (create_node 15 "b"))
+  (set_left_child r a)
+  (set_right_child r b)
+  (set_left_child a c)
+  (set_right_child a d)
+  (fiveam:is (equalp r (toroot (right_turn a)))))
 
 (fiveam:run!)
