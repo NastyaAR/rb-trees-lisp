@@ -16,10 +16,24 @@
 ;         is_root
 (defclass node ()
     (
-        (val :accessor val)
-        (color :accessor color)
-        (children :accessor children)
-        (root :accessor root)
+        (val :accessor val :initform -1000)
+        (color :accessor color :initform "b")
+        (children :accessor children :initform (cons nil nil))
+        (root :accessor root :initform nil)
+    )
+)
+
+(defun create_list ()
+    (make-instance 'node)
+)
+
+(defun create_node (vl clr &optional rt ch)
+    (let* ((new (make-instance 'node)))
+        (setf (color new) clr)
+        (setf (val new) vl) 
+        (if (not (null rt)) (setf (root new) root))
+        (if (not (null ch)) (setf (children new) ch) (setf (children new) (cons (create_list) (create_list))))
+        new
     )
 )
 
@@ -29,7 +43,14 @@
 ;params: object - src node
 ;return: node
 (defmethod tored ((object node))
-   (and (setf (color object) "red") object)
+   (and (setf (color object) "r") object)
+)
+
+(defmethod toroot ((object node))
+    (cond
+        ((is_root object) object)
+        (T (toroot (root object)))
+    )
 )
 
 ;method toblack on node class
@@ -37,7 +58,7 @@
 ;params: object - src node
 ;return node
 (defmethod toblack ((object node))
-   (and (setf (color object) "black") object)
+   (and (setf (color object) "b") object)
 )
 
 ;method print-object on node class
@@ -61,7 +82,39 @@
 ;params: object - src node
 ;return: node
 (defmethod get_right_child ((object node))
-    (cadr (children object))
+    (cdr (children object))
+)
+
+(defun get_left_grandson (object)
+    (cond 
+        ((null object) nil)
+        ((islistik object) nil)
+        (T (get_left_child (get_left_child object)))
+    )
+)
+
+(defun get_lr_grandson (object)
+    (cond
+        ((null object) nil)
+        ((islistik object) nil)
+        (T (get_right_child (get_left_child object)))
+    )
+)
+
+(defun get_rl_grandson (object)
+    (cond
+        ((null object) nil)
+        ((islistik object) nil)
+        (T (get_left_child (get_right_child object)))
+    )
+)
+
+(defun get_right_grandson (object)
+    (cond 
+        ((null object) nil)
+        ((islistik object) nil)
+        (T (get_right_child (get_right_child object)))
+    )
 )
 
 ;method set_left_child on node class
@@ -70,7 +123,17 @@
 ;        new_val - new left child node
 ;return: node
 (defmethod set_left_child ((object node) new_val)
-    (rplaca (children object) new_val)
+    (cond
+        ((null new_val) object)
+        ((not (isnullnode (get_left_child object))) object)
+        (T     (and 
+                    (tolistik new_val)
+                    (rplaca (children object) new_val)
+                    (setf (root new_val) object)
+                    object
+                )
+        )
+    )
 )
 
 ;method set_right_child on node class
@@ -79,16 +142,17 @@
 ;        new_val - new right child node
 ;return: node
 (defmethod set_right_child ((object node) new_val)
-    (rplacd (children object) (list new_val))
-)
-
-;method set_root on node class
-;desc: set parent as new root of object node
-;params: object - src node
-;        parent - new parent node
-;return node
-(defmethod set_root ((object node) parent)
-    (and (setf (root object) parent) object)
+    (cond
+        ((null new_val) object)
+        ((not (isnullnode (get_right_child object))) object)
+        (T     (and 
+                    (tolistik new_val)
+                    (setf (cdr (children object)) new_val)
+                    (setf (root new_val) object)
+                    object
+                )
+        )
+    )
 )
 
 ;method tolistik on node class
@@ -96,7 +160,10 @@
 ;params: object - src node
 ;return: node
 (defmethod tolistik ((object node))
-    (and (rplaca (children object) nil) (rplacd (children object) nil))
+    (and (rplaca (children object) (create_list)) 
+         (rplacd (children object) (create_list)) 
+         object
+    )
 )
 
 ;method islistik on node class
@@ -105,7 +172,11 @@
 ;return: T - object is tree list
 ;        Nil - object isnt tree list
 (defmethod islistik ((object node))
-    (and (null (car (children object))) (null (cadr (children object))))
+    (and (= (val (car (children object))) -1000) (= (val (cdr (children object))) -1000))
+)
+
+(defmethod isnullnode ((object node))
+    (and (= (val object) -1000) (equalp (children object) (cons nil nil)))
 )
 
 ;method is_root on node class
@@ -123,9 +194,9 @@
 ;        item - insert node
 ;return: node
 (defun insert (root item)
-    (cond ((and (< (val item) (val root)) (null (car (children root)))) (and (set_left_child root item) (set_root item root)))
+    (cond ((and (< (val item) (val root)) (null (car (children root)))) (set_left_child root item))
           ((and (< (val item) (val root))) (insert (car (children root)) item))
-          ((and (> (val item) (val root)) (null (cadr (children root)))) (and (set_right_child root item) (set_root item root)))
+          ((and (> (val item) (val root)) (null (cadr (children root)))) (set_right_child root item))
           ((and (> (val item) (val root))) (insert (cadr (children root)) item))
     )
 )
@@ -134,26 +205,36 @@
 ;desc: make a large left turn of the tree
 ;params: parent - node around which the rotation is made
 ;return: node
+
+
+;!!!!!!!!!!!!!!могут быть траблы, если запускать от отца у которого сын без детей
 (defun left_turn (parent) 
     (let* (
-            (new_parent (copy-tree (get_right_child parent)))
-            (child1     (tored (copy-tree parent)))
-            (child2     (copy-tree (get_right_child (get_right_child parent))))
-            (child11    (copy-tree (get_left_child parent)))
-            (child12    (copy-tree (get_left_child new_parent)))
-          )
-            ; (print new_parent)
-            ; (print child1)
-            ; (print child2)
-            ; (print child11)
-            ; (print "---")
-            ; (print child12)
+            (tmp_parent (copy-tree parent))
+            (tmp_left_son (copy-tree (get_left_child parent)))
+            (tmp_right_son (copy-tree (get_right_child parent)))
+            (tmp_rl_grand (copy-tree (get_rl_grandson parent)))
+            (tmp_rr_grand (copy-tree (get_right_grandson parent)))
 
-            (set_left_child new_parent child1)
-            (set_right_child new_parent child2)
-            (set_left_child child1 child11)
-            (set_right_child child1 child12)
-            new_parent
+            (right_son (copy-tree (get_right_child parent)))
+            (left_son   (copy-tree (get_left_child parent)))
+            (rl_grand     (copy-tree (get_rl_grandson parent)))
+            (rr_grand    (copy-tree (get_right_grandson parent)))
+          )
+            (setf (root rl_grand) parent)
+            (setf (cdr (children parent)) rl_grand)
+
+            (setf (root right_son) (root tmp_parent))
+            
+            (cond ((is_root tmp_parent) right_son)
+                  ((equalp (get_left_child (root tmp_parent)) tmp_parent) (setf (car (children (root tmp_parent))) right_son))
+                  (T (setf (cdr (children (root tmp_parent))) right_son)))
+
+            (setf (root parent) right_son)
+            (setf (car (children right_son)) parent)
+            (print_tree right_son)
+
+            right_son
     )
 )
 
@@ -161,6 +242,9 @@
 ;desc: make a large right turn of the tree
 ;params: parent - node around which the rotation is made
 ;return: node
+
+
+;!!!!!!!!!!!!!!могут быть траблы, если запускать от отца у которого сын без детей
 (defun right_turn (parent)
     (let* (
             (new_parent     (copy-tree (get_left_child parent)))
@@ -258,7 +342,20 @@
 (defun print_tree (parent)
     (cond ((null parent) 1)
           ((islistik parent) (print parent))
-          (T (and (print parent) (print (children parent)) (print_tree (car (children parent))) (print_tree (cadr (children parent)))))
+          (T (and (print parent) (print (children parent)) (print_tree (car (children parent))) (print_tree (cdr (children parent)))))
+    )
+)
+
+;method case1
+;desc: null case for balancing
+;params: parent - current root of tree
+;return: T - null case was realized
+;        Nil - null case wasnt realized
+(defun case0 (parent)
+    (and
+        (not (null parent))
+        (is_root parent)
+        (equalp "r" (color parent)) 
     )
 )
 
@@ -270,15 +367,37 @@
 (defun case1 (parent)
     (let* ((son1        (get_left_child parent))
            (uncle_son2    (get_right_child parent))
-           (grandson  (get_left_child (get_left_child parent))))
+           (grandson  (get_left_grandson parent)))
+            (print "1-------")
+            (print son1)
+            (print grandson)
+            (print uncle_son2)
+            (print "1-------")
+          (and (not (null grandson))
+               (equal "r" (color son1))
+               (equal "r" (color uncle_son2))
+               (equal "r" (color grandson)))
+    )
+)
+
+;method case1_right
+;desc: first case for balancing
+;params: parent - current root of tree
+;return: T - first case was realized
+;        Nil - first case wasnt realized
+(defun case1_right (parent)
+    (let* ((son1        (get_left_child parent))
+           (uncle_son2    (get_right_child parent))
+           (grandson  (get_right_grandson parent)))
             (print "-------")
             (print son1)
             (print grandson)
             (print uncle_son2)
             (print "-------")
-          (and (equal "red" (color son1))
-               (equal "red" (color uncle_son2))
-               (equal "red" (color grandson)))
+          (and (not (null grandson))
+               (equal "r" (color son1))
+               (equal "r" (color uncle_son2))
+               (equal "r" (color grandson)))
     )
 )
 
@@ -289,7 +408,7 @@
 ;        Nil - second left case wasnt realized
 (defun case2_left (parent)
     (let* ((uncle_son2         (get_right_child parent))
-           (grandson    (cadr (children (get_left_child parent))))
+           (grandson    (get_lr_grandson parent))
            (son1    (get_left_child parent)))
             
             (print "-------")
@@ -298,9 +417,10 @@
             (print uncle_son2)
             (print "-------")
 
-          (and (equal "black" (color uncle_son2))
-               (equal "red"   (color son1))
-               (equal "red"   (color grandson)))
+          (and (not (null grandson))
+               (equal "b" (color uncle_son2))
+               (equal "r"   (color son1))
+               (equal "r"   (color grandson)))
     )
 )
 
@@ -311,8 +431,8 @@
 ;        Nil - second right case wasnt realized
 (defun case2_right (parent)
     (let* ((son1        (get_right_child parent))
-           (grandson        (car (children (get_right_child parent))))
-           (uncle_son2        (get_left_child parent)))
+           (grandson    (get_rl_grandson parent))
+           (uncle_son2  (get_left_child parent)))
             
             (print "-------")
             (print son1)
@@ -320,9 +440,10 @@
             (print uncle_son2)
             (print "-------")
 
-          (and (equal "black" (color uncle_son2))
-               (equal "red"   (color son1))
-               (equal "red"   (color grandson)))
+          (and (not (null grandson))
+               (equal "b" (color uncle_son2))
+               (equal "r"   (color son1))
+               (equal "r"   (color grandson)))
     )
 )
 
@@ -334,7 +455,7 @@
 (defun case3_left (parent)
     (let* ((son1          (get_left_child parent))
            (uncle_son2    (get_right_child parent))
-           (grandson      (car (children (get_left_child parent))))
+           (grandson      (get_left_grandson parent))
            )
 
             (print "-------")
@@ -343,9 +464,10 @@
             (print uncle_son2)
             (print "-------")
 
-          (and (equal "red" (color son1))
-               (equal "black" (color uncle_son2))
-               (equal "red" (color grandson)))
+          (and (not (null grandson))
+               (equal "r" (color son1))
+               (equal "b" (color uncle_son2))
+               (equal "r" (color grandson)))
     )
 )
 
@@ -357,7 +479,7 @@
 (defun case3_right (parent)
     (let* ((son1        (get_right_child parent))
            (uncle_son2  (get_left_child parent))
-           (grandson    (cadr (children (get_right_child parent)))))
+           (grandson    (get_right_grandson parent)))
 
             (print "-------")
             (print son1)
@@ -365,9 +487,10 @@
             (print uncle_son2)
             (print "-------")
 
-          (and (equal "red" (color son1))
-               (equal "black" (color uncle_son2))
-               (equal "red" (color grandson)))
+          (and (not (null grandson))
+               (equal "r" (color son1))
+               (equal "b" (color uncle_son2))
+               (equal "r" (color grandson)))
     )
 )
 
@@ -529,8 +652,8 @@
 ; (depth_trav n0)
 ; (print (root (root n3)))
 
-(print (append '(1) (list)))
-(merge_tree n13 n0)
-(print_tree n0)
+; (print (append '(1) (list)))
+; (merge_tree n13 n0)
+; (print_tree n0)
 
 
