@@ -309,9 +309,9 @@
 ;params: parent - parent node of swapping
 ;return: node
 (defun swap_color_red_up (parent)
-    (let* ((cur_parent (car parent))
-           (left (caadr parent))
-           (right (cadadr parent))
+    (let* ((cur_parent  parent)
+           (left (get_left_child parent))
+           (right (get_right_child parent))
            )
 
            (tored cur_parent)
@@ -527,7 +527,7 @@
             (T (and (left_turn (get_left_child parent)) (right_turn parent)
                     (toblack (get_left_child root_of_parent))
                     (tored (get_lr_grandson root_of_parent))
-                    ; (balance_tree root_of_parent)
+                    (balance_tree root_of_parent)
                 )))
     )
 )
@@ -542,7 +542,7 @@
             (T (and (right_turn (get_right_child parent)) (left_turn parent) 
                     (toblack (get_right_child root_of_parent))
                     (tored (get_rl_grandson root_of_parent))
-                    ; (balance_tree root_of_parent)
+                    (balance_tree root_of_parent)
                 )))
     )
 )
@@ -558,7 +558,7 @@
                     (tored parent)
                     (left_turn parent) 
                     T
-                    ; (balance_tree (root_of_parent parent))
+                    (balance_tree root_of_parent)
                 )))
     )
 )
@@ -574,7 +574,7 @@
                     (tored parent)
                     (right_turn parent) 
                     T
-                    ; (balance_tree (root parent))
+                    (balance_tree root_of_parent)
                 )))
     )
 )
@@ -590,12 +590,12 @@
             ((and (islistik parent) (not (is_root parent)))                        (and (print "list") (balance_tree (root parent))))
             ((case0 parent)                           (and (print "0") (case0_impl parent)))
             ((case1 parent)                           (and (print "1.1") (case1_impl_left parent)))
-            ((case1_right parent)                     (and (print "1.2") (case2_impl_right parent)))
+            ((case1_right parent)                     (and (print "1.2") (print parent) (case1_impl_right parent)))
             ((case2_left parent)                      (and (print "2.1") (case2_impl_left parent)))
             ((case2_right parent)                     (and (print "2.2") (case2_impl_right parent)))
             ((case3_left parent)                      (and (print "3.1") (case3_impl_right parent)))
             ((case3_right parent)                     (and (print "3.2") (case3_impl_left parent)))
-            (t                                        (and (print "4 - balanced") parent))
+            (t                                        (and (print "4 - balanced") (balance_tree (root parent))))
     )
 )
 

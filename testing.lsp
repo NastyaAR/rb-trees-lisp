@@ -518,14 +518,113 @@
              ))
  )
 
- (fiveam:test balance-tree-red-root-test
+ (fiveam:test balance-tree-red-root-and-red-child-test
   (setf r (create_node 100 "r"))
+  (setf a (create_node 90 "r"))
+  (set_left_child r a)
   (balance_tree r)
   (print_tree (toroot r))
   (fiveam:is (and 
                 (equalp r (toroot r))
                 (equalp "b" (color r))
+                (equalp "r" (color a))
              ))
+ )
+
+ (fiveam:test balance-tree-red-root-and-two-red-child-test
+  (setf r (create_node 100 "r"))
+  (setf a (create_node 90 "r"))
+  (setf b (create_node 120 "r"))
+  (set_left_child r a)
+  (set_right_child r b)
+  (balance_tree r)
+  (print_tree (toroot r))
+  (fiveam:is (and 
+                (equalp r (toroot r))
+                (equalp "b" (color r))
+                (equalp "r" (color a))
+                (equalp "r" (color b))
+             ))
+ )
+
+ (fiveam:test balance-four-height-red-list-red-right-parent-test
+  (setf r (create_node 2 "b"))
+  (setf a (create_node 1 "b"))
+  (setf b (create_node 4 "b"))
+  (setf c (create_node 3 "r"))
+  (setf d (create_node 5 "r"))
+  (setf e (create_node 6 "r"))
+  (set_left_child r a)
+  (set_right_child r b)
+  (set_left_child b c)
+  (set_right_child b d)
+  (set_right_child d e)
+  (balance_tree e)
+  (print_tree (toroot r))
+  (fiveam:is (and 
+                (equalp r (toroot r))
+                (equalp "r" (color b))
+                (equalp "b" (color c))
+                (equalp "b" (color d))
+             ))
+ )
+
+ (fiveam:test balance-four-height-two-red-left-child-test
+  (setf r (create_node 2 "b"))
+  (setf a (create_node 1 "b"))
+  (setf b (create_node 3 "b"))
+  (setf c (create_node 4 "r"))
+  (setf d (create_node 5 "r"))
+  (set_left_child r a)
+  (set_right_child r b)
+  (set_right_child b c)
+  (set_left_child c d)
+  (balance_tree d)
+  (print_tree (toroot r))
+  (fiveam:is (and 
+                (equalp r (toroot r))
+                (equalp "b" (color d))
+                (equalp "r" (color b))
+                (equalp "r" (color c))
+             ))
+ )
+
+ (fiveam:test balance-five-height-two-red-right-child-test
+  (setf r (create_node 13 "b"))
+  (setf a (create_node 8 "r"))
+  (setf b (create_node 17 "r"))
+  (setf c (create_node 1 "b"))
+  (setf d (create_node 11 "b"))
+  (setf e (create_node 6 "r"))
+  (setf f (create_node 15 "b"))
+  (setf g (create_node 25 "b"))
+  (setf i (create_node 22 "r"))
+  (setf k (create_node 27 "r"))
+  (setf m (create_node 30 "r"))
+  (set_left_child r a)
+  (set_right_child r b)
+
+  (set_left_child a c)
+  (set_right_child a d)
+
+  (set_right_child c e)
+
+  (set_left_child b f)
+  (set_right_child b g)
+
+  (set_left_child g i)
+  (set_right_child g k)
+
+  (set_right_child k m)
+
+  (balance_tree m)
+  (print_tree (toroot r))
+;   (fiveam:is (and 
+;                 (equalp r (toroot r))
+;                 (equalp "b" (color d))
+;                 (equalp "r" (color b))
+;                 (equalp "r" (color c))
+;              ))
  )
 
 (fiveam:run!)
