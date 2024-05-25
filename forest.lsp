@@ -512,7 +512,7 @@
 )
 
 (defun case1_impl_right (parent)
-    (cond ((is_root parent) (and (swap_color_red_up parent)) (toblack parent))
+    (cond ((is_root parent) (and (swap_color_red_up parent) (toblack parent)))
           (T (and (swap_color_red_up parent) (balance_tree (root parent))))
     )
 )
@@ -522,8 +522,14 @@
 ;params: parent - current root of tree
 ;return: node
 (defun case2_impl_left (parent)
-    (cond ((is_root parent)  (toblack (right_turn (small_left_turn parent))))
-          (T (and ())))
+    (let* ((root_of_parent (root parent)))
+        (cond ((is_root parent)  (toblack (right_turn (small_left_turn parent))))
+            (T (and (left_turn (get_left_child parent)) (right_turn parent)
+                    (toblack (get_left_child root_of_parent))
+                    (tored (get_lr_grandson root_of_parent))
+                    ; (balance_tree root_of_parent)
+                )))
+    )
 )
 
 ;method case2_impl_right
@@ -535,7 +541,9 @@
         (cond ((is_root parent) (toblack (left_turn (small_right_turn parent))))
             (T (and (right_turn (get_right_child parent)) (left_turn parent) 
                     (toblack (get_right_child root_of_parent))
-                    (tored (get_rl_grandson root_of_parent)))))
+                    (tored (get_rl_grandson root_of_parent))
+                    ; (balance_tree root_of_parent)
+                )))
     )
 )
 
@@ -544,8 +552,15 @@
 ;params: parent - current root of tree
 ;return: node
 (defun case3_impl_left (parent)
-    (cond ((is_root parent) (toblack (left_turn parent)))
-          (T (and (left_turn parent) (balance_tree (root parent)))))
+    (let* ((root_of_parent (root parent)))
+        (cond ((is_root parent) (toblack (left_turn parent)))
+            (T (and (toblack (get_right_child parent))
+                    (tored parent)
+                    (left_turn parent) 
+                    T
+                    ; (balance_tree (root_of_parent parent))
+                )))
+    )
 )
 
 ;method case3_impl_right
@@ -553,8 +568,15 @@
 ;params: parent - current root of tree
 ;return: node
 (defun case3_impl_right (parent)
-    (cond ((is_root parent) (toblack (right_turn parent)))
-          (T (and (right_turn parent) (balance_tree (root parent)))))
+    (let* ((root_of_parent (root parent)))
+        (cond ((is_root parent) (toblack (right_turn parent)))
+            (T (and (toblack (get_left_child parent))
+                    (tored parent)
+                    (right_turn parent) 
+                    T
+                    ; (balance_tree (root parent))
+                )))
+    )
 )
 
 ;method balance_tree
@@ -563,20 +585,17 @@
 ;return: node
 (defun balance_tree (parent)
     (cond 
-            ; ((and (null root) (null parent)))
-            ; ((and (null root) (is_root parent)) (and (print "0") (balance_tree parent parent)))
-            ; ((case1 parent)                           (and (print "1") (swap_color_red_up parent) (balance_tree nil (root parent))))
-            ; ((case2_left parent)                      (and (print "2") (left_turn (small_left_turn parent)) (balance_tree nil (root parent))))
-            ; ((case2_right parent)                     (and (print "3") (right_turn (small_right_turn parent)) (balance_tree nil (root parent))))
-            ; ((case3_left parent)                      (and (print "4") (left_turn parent) (balance_tree nil (root parent))))
-            ; ((case3_right parent)                     (and (print "5") (right_turn parent) (balance_tree nil (root parent))))
-            ; ((not (null root)) parent)
-            ((case1 parent)                           (and (print "1") (case1_impl parent)))
-            ((case2_left parent)                      (and (print "2") (case2_impl_left parent)))
-            ((case2_right parent)                     (and (print "3") (case2_impl_left parent)))
-            ((case3_left parent)                      (and (print "4") (case3_impl_right parent)))
-            ((case3_right parent)                     (and (print "5") (case3_impl_right parent)))
-            (t                                        (and (print "6") parent))
+            ((null parent)                            (and (print "nil") nil))
+            ((isnullnode parent)                      (and (print "nullnode") (balance_tree (root parent))))
+            ((and (islistik parent) (not (is_root parent)))                        (and (print "list") (balance_tree (root parent))))
+            ((case0 parent)                           (and (print "0") (case0_impl parent)))
+            ((case1 parent)                           (and (print "1.1") (case1_impl_left parent)))
+            ((case1_right parent)                     (and (print "1.2") (case2_impl_right parent)))
+            ((case2_left parent)                      (and (print "2.1") (case2_impl_left parent)))
+            ((case2_right parent)                     (and (print "2.2") (case2_impl_right parent)))
+            ((case3_left parent)                      (and (print "3.1") (case3_impl_right parent)))
+            ((case3_right parent)                     (and (print "3.2") (case3_impl_left parent)))
+            (t                                        (and (print "4 - balanced") parent))
     )
 )
 

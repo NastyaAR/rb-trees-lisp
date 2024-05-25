@@ -463,4 +463,69 @@
   (fiveam:is (equalp r (toroot a)))
  )
 
+ (fiveam:test case2-impl-left-normal-test
+  (setf r (create_node 100 "b"))
+  (setf a (create_node 50 "b"))
+  (setf b (create_node 120 "b"))
+  (setf c (create_node 40 "r"))
+  (setf d (create_node 45 "r"))
+  (set_left_child r a)
+  (set_right_child r b)
+  (set_left_child a c)
+  (set_right_child c d)
+  (case2_impl_left a)
+  (print_tree (toroot b))
+  (fiveam:is (equalp r (toroot a)))
+ )
+
+ (fiveam:test case3-impl-left-normal-test
+  (setf r (create_node 17 "b"))
+  (setf a (create_node 9 "b"))
+  (setf b (create_node 19 "b"))
+  (setf c (create_node 81 "r"))
+  (setf d (create_node 75 "r"))
+  (set_left_child r a)
+  (set_right_child r b)
+  (set_right_child b d)
+  (set_right_child d c)
+  (case3_impl_left b)
+  (print_tree (toroot b))
+  (fiveam:is (equalp r (toroot a)))
+ )
+
+ (fiveam:test case3-impl-right-normal-test
+  (setf r (create_node 100 "b"))
+  (setf a (create_node 50 "b"))
+  (setf b (create_node 120 "b"))
+  (setf c (create_node 40 "r"))
+  (setf d (create_node 30 "r"))
+  (set_left_child r a)
+  (set_right_child r b)
+  (set_left_child a c)
+  (set_left_child c d)
+  (case3_impl_right a)
+  (print_tree (toroot b))
+  (fiveam:is (equalp r (toroot a)))
+ )
+
+ (fiveam:test balance-tree-red-root-test
+  (setf r (create_node 100 "r"))
+  (balance_tree r)
+  (print_tree (toroot r))
+  (fiveam:is (and 
+                (equalp r (toroot r))
+                (equalp "b" (color r))
+             ))
+ )
+
+ (fiveam:test balance-tree-red-root-test
+  (setf r (create_node 100 "r"))
+  (balance_tree r)
+  (print_tree (toroot r))
+  (fiveam:is (and 
+                (equalp r (toroot r))
+                (equalp "b" (color r))
+             ))
+ )
+
 (fiveam:run!)
