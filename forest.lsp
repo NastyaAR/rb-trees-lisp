@@ -23,10 +23,20 @@
     )
 )
 
+;method create_list
+;desc: create rb listik
+;return: node
 (defun create_list ()
     (make-instance 'node)
 )
 
+;method create_node
+;desc: create rb tree node
+;params: vl - value
+;        clr - color
+;        (opt) rt - root of node
+;        (opt) ch - children of node
+;return: node
 (defun create_node (vl clr &optional rt ch)
     (let* ((new (make-instance 'node)))
         (setf (color new) clr)
@@ -46,6 +56,10 @@
    (and (setf (color object) "r") object)
 )
 
+;method toroot on node class
+;desc: returns root of rb tree
+;params: object - src node
+;return: node
 (defmethod toroot ((object node))
     (cond
         ((is_root object) object)
@@ -85,6 +99,10 @@
     (cdr (children object))
 )
 
+;method get_left_grandson
+;desc: get left son of left son
+;params: object - src node
+;return: node
 (defun get_left_grandson (object)
     (cond 
         ((null object) nil)
@@ -93,6 +111,10 @@
     )
 )
 
+;method get_lr_grandson
+;desc: get right son of left son
+;params: object - src node
+;return: node
 (defun get_lr_grandson (object)
     (cond
         ((null object) nil)
@@ -101,6 +123,10 @@
     )
 )
 
+;method get_rl_grandson
+;desc: get left son of right son
+;params: object - src node
+;return: node
 (defun get_rl_grandson (object)
     (cond
         ((null object) nil)
@@ -109,6 +135,10 @@
     )
 )
 
+;method get_right_son
+;desc: get right son of right son
+;params: object - src node
+;return: node
 (defun get_right_grandson (object)
     (cond 
         ((null object) nil)
@@ -175,6 +205,11 @@
     (and (= (val (car (children object))) -1000) (= (val (cdr (children object))) -1000))
 )
 
+;method isnullnode on node class
+;desc: check if node is null rb tree node
+;params: object - src node
+;return: T - object is is null rb tree node
+;        Nil - object isnt is null rb tree node
 (defmethod isnullnode ((object node))
     (and (= (val object) -1000) (equalp (children object) (cons nil nil)))
 )
@@ -322,23 +357,6 @@
     )
 )
 
-;method swap_color_black_up
-;desc: make a swap of colors when there is a black node at the top
-;params: parent - parent node of swapping
-;return: node
-(defun swap_color_black_up (parent)
-    (let* ((cur_parent (car parent))
-           (left (caadr parent))
-           (right (cadadr parent))
-           )
-
-           (toblack cur_parent)
-           (tored left)
-           (tored right)
-            parent
-    )
-)
-
 ;method print_tree
 ;desc: recursive print of tree
 ;params: parent - root of tree
@@ -350,7 +368,7 @@
     )
 )
 
-;method case1
+;method case0
 ;desc: null case for balancing
 ;params: parent - current root of tree
 ;return: T - null case was realized
@@ -498,11 +516,15 @@
     )
 )
 
+;method case0_impl
+;desc: balancing in the null case
+;params: parent - current root of tree
+;return: node
 (defun case0_impl (parent)
     (toblack parent)
 )
 
-;method case1_impl
+;method case1_impl_left
 ;desc: balancing in the first case
 ;params: parent - current root of tree
 ;return: node
@@ -512,6 +534,10 @@
     )
 )
 
+;method case1_impl_right
+;desc: balancing in the first case
+;params: parent - current root of tree
+;return: node
 (defun case1_impl_right (parent)
     (cond ((is_root parent) (and (swap_color_red_up parent) (toblack parent)))
           (T (and (swap_color_red_up parent) (balance_tree (car (root parent)))))
@@ -600,17 +626,10 @@
     )
 )
 
-;method depth_trav
-;desc: recursive depth-first traversal with balancing
-;params: parent - root node of tree
-(defun depth_trav (parent res)
-    (cond 
-            ((null parent) res)
-            ((islistik parent) ( (car (root (car (root parent))))))
-            (T (depth_trav (and (balance_tree (car (children parent))) (balance_tree (cdr (children parent))))))
-    )
-)
-
+;method tolist
+;desc: rb tree to multi-level list
+;params: parent - root of rb tree
+;        res - result multi-level list
 (defun tolist (parent res)
     (cond ((null parent) Nil)
           ((isnullnode parent) Nil)
@@ -621,14 +640,18 @@
     )
 )
 
+;method flatten
+;desc: multi-level list to single-level list
+;params: w - source list
+;        ac - tail
 (defun flatten (w &optional ac) 
   (cond ((null w) ac)
         ((atom w) (cons w ac))
         ((flatten (car w) (flatten (cdr w) ac)))))
 
-;method merge_tree
+;method merge_tree_from_list
 ;desc: merging to rb binary trees
-;params: src - root of source tree
+;params: src - list with nodes
 ;        dest - root of destination tree
 (defun merge_tree_from_list (src dst)
     (cond ((null src) T)
@@ -640,6 +663,10 @@
     )
 )
 
+;method merge_tree
+;desc: merging to rb binary trees
+;params: src - root of source tree
+;        dest - root of destination tree
 (defun merge_tree (src dst)
     (let* ((lst (flatten (tolist src Nil))))
         (print lst)

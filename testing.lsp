@@ -686,7 +686,6 @@
   (set_right_child c e)
   (set_left_child c d)
   (merge_tree c r)
-  ; (print_tree (toroot r))
   (fiveam:is (is_root r))
  )
 
