@@ -194,10 +194,11 @@
 ;        item - insert node
 ;return: node
 (defun insert (root item)
-    (cond ((and (< (val item) (val root)) (null (car (children root)))) (set_left_child root item))
+    (cond ((null root) item)
+          ((and (isnullnode  (get_left_child root)) (< (val item) (val root))) (set_left_child root item))
           ((and (< (val item) (val root))) (insert (car (children root)) item))
-          ((and (> (val item) (val root)) (null (cadr (children root)))) (set_right_child root item))
-          ((and (> (val item) (val root))) (insert (cadr (children root)) item))
+          ((and (isnullnode (get_right_child root)) (> (val item) (val root))) (set_right_child root item))
+          ((and (> (val item) (val root))) (insert (cdr (children root)) item))
     )
 )
 
@@ -220,16 +221,16 @@
           )
 
             (setf (root rl_grand) parent)
-            (setf (cdr (children parent)) rl_grand)
+            (rplacd (children parent) rl_grand)
 
             (setf (root right_son) (root tmp_parent))
             
             (cond ((is_root tmp_parent) right_son)
                   ((equalp (get_left_child (root tmp_parent)) tmp_parent) (setf (car (children (root tmp_parent))) right_son))
-                  (T (setf (cdr (children (root tmp_parent))) right_son)))
+                  (T (rplacd (children (root tmp_parent)) right_son)))
 
             (setf (root parent) right_son)
-            (setf (car (children right_son)) parent)
+            (rplaca (children right_son) parent)
 
             right_son
     )
@@ -624,72 +625,6 @@
     )
 )
 
-(setf n0 (make-instance 'node))
-(setf n1 (make-instance 'node))
-(setf n2 (make-instance 'node))
-(setf n3 (make-instance 'node))
-(setf n4 (make-instance 'node))
-(setf n5 (make-instance 'node))
-(setf n6 (make-instance 'node))
 
-
-(setf (val n3) 5)
-(setf (color n3) "black")
-(setf (children n3) (list nil nil))
-(setf (root n3) n1)
-
-(setf (val n5) 11)
-(setf (color n5) "black")
-(setf (children n5) (list nil nil))
-(setf (root n5) n4)
-
-(setf (val n6) 12)
-(setf (color n6) "black")
-(setf (children n6) (list nil nil))
-(setf (root n6) n4)
-
-(setf (val n4) 10)
-(setf (color n4) "red")
-(setf (children n4) (list n5 n6))
-(setf (root n4) n0)
-
-(setf (val n2) 3)
-(setf (color n2) "black")
-(setf (children n2) (list nil nil))
-(setf (root n2) n1)
-
-(setf (val n1) 4)
-(setf (color n1) "red")
-(setf (children n1) (list n2 n3))
-(setf (root n1) n0)
-
-(setf (val n0) 6)
-(setf (color n0) "black")
-(setf (children n0) (list n1 n4))
-(setf (root n0) nil)
-
-; (print_tree n0)
-; (print_tree (depth_trav n3))
-(setf n14 (make-instance 'node))
-(setf (val n14) 14)
-(setf (color n14) "black")
-(setf (children n14) (list nil nil))
-
-(setf n13 (make-instance 'node))
-(setf (val n13) 13)
-(setf (color n13) "black")
-(setf (children n13) (list nil n14))
-
-
-; (insert n0 n13)
-; (print "---------")
-; (print_tree n0)
-; (print (root n13))
-; (depth_trav n0)
-; (print (root (root n3)))
-
-; (print (append '(1) (list)))
-; (merge_tree n13 n0)
-; (print_tree n0)
 
 

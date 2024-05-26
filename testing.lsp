@@ -627,4 +627,30 @@
 ;              ))
  )
 
+(fiveam:test insert-test
+  (setf r (create_node 2 "b"))
+  (setf a (create_node 1 "b"))
+  (setf b (create_node 3 "b"))
+  (setf c (create_node 4 "r"))
+  (setf d (create_node 5 "r"))
+  (setf e (create_node 6 "r"))
+  (set_left_child r a)
+  (set_right_child r b)
+  (set_right_child b c)
+  (set_right_child c d)
+  (insert r e)
+  (print_tree (toroot r))
+  (fiveam:is 
+                (equalp e (get_right_child d)))
+ )
+
+(fiveam:test insert-nil-test
+  (setf r (create_node 2 "b"))
+  (insert nil e)
+  (print_tree (toroot r))
+  (fiveam:is (is_root r))
+ )
+
+
+
 (fiveam:run!)
