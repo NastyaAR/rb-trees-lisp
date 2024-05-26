@@ -586,7 +586,7 @@
 ;return: node
 (defun balance_tree (parent)
     (cond 
-            ((null parent)                            (and (print "nil") nil))
+            ((null parent)                            (and (print "nil") T))
             ((isnullnode parent)                      (and (print "nullnode") (balance_tree (car (root parent)))))
             ((and (islistik parent) (not (is_root parent)))                        (and (print "list") (balance_tree (car (root parent)))))
             ((case0 parent)                           (and (print "0") (case0_impl parent)))
@@ -603,28 +603,46 @@
 ;method depth_trav
 ;desc: recursive depth-first traversal with balancing
 ;params: parent - root node of tree
-(defun depth_trav (parent)
+(defun depth_trav (parent res)
     (cond 
-            ((null parent) 1)
-            ((islistik parent) (balance_tree (car (root (car (root parent))))))
-            (T (depth_trav (and (balance_tree (car (children parent))) (balance_tree (cadr (children parent))))))
+            ((null parent) res)
+            ((islistik parent) ( (car (root (car (root parent))))))
+            (T (depth_trav (and (balance_tree (car (children parent))) (balance_tree (cdr (children parent))))))
     )
 )
+
+(defun tolist (parent res)
+    (cond ((null parent) Nil)
+          ((isnullnode parent) Nil)
+          ((islistik parent) parent)
+          ((isnullnode (get_right_child parent))   (list parent (tolist (car (children parent)) res)))
+          ((isnullnode (get_left_child parent))    (list parent (tolist (cdr (children parent)) res)))
+          (t (list parent (tolist (car (children parent)) res) (tolist (cdr (children parent)) res)))
+    )
+)
+
+(defun flatten (w &optional ac) 
+  (cond ((null w) ac)
+        ((atom w) (cons w ac))
+        ((flatten (car w) (flatten (cdr w) ac)))))
 
 ;method merge_tree
 ;desc: merging to rb binary trees
 ;params: src - root of source tree
 ;        dest - root of destination tree
-(defun merge_tree (src dst)
-    (cond ((null src) 1)
-          ((islistik src) (and (insert dst (tored src)) (balance_tree dst)))
-          (T (and   (and (insert dst (tored src)) 
-                         (balance_tree dst))
-                  (merge_tree (car (children src)) dst) 
-                  (merge_tree (cadr (children src)) dst)))
+(defun merge_tree_from_list (src dst)
+    (cond ((null src) T)
+          (T (and
+                    (insert dst (tored (car src)))
+                    (balance_tree (car src))
+                    (merge_tree_from_list (cdr src) (toroot dst)) 
+          ))
     )
 )
 
-
-
-
+(defun merge_tree (src dst)
+    (let* ((lst (flatten (tolist src Nil))))
+        (print lst)
+        (merge_tree_from_list lst dst)
+    )
+)

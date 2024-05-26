@@ -652,6 +652,44 @@
   (fiveam:is (is_root r))
  )
 
+(fiveam:test merge-one-test
+  (setf r (create_node 2 "b"))
+  (setf a (create_node 1 "b"))
+  (set_left_child r a)
+  (setf b (create_node 3 "r"))
+  (merge_tree b r)
+  (print_tree (toroot r))
+  (fiveam:is (is_root r))
+ )
+
+(fiveam:test merge-two-test
+  (setf r (create_node 2 "b"))
+  (setf a (create_node 1 "b"))
+  (set_left_child r a)
+  (setf b (create_node 3 "r"))
+  (setf c (create_node 4 "r"))
+  (set_right_child b c)
+  (merge_tree b r)
+  (print_tree (toroot r))
+  (fiveam:is (is_root b))
+ )
+
+(fiveam:test merge-123-567-test
+  (setf r (create_node 2 "b"))
+  (setf a (create_node 1 "b"))
+  (set_left_child r a)
+  (set_right_child r b)
+  (setf b (create_node 3 "r"))
+  (setf c (create_node 5 "b"))
+  (setf d (create_node 6 "b"))
+  (setf e (create_node 7 "b"))
+  (set_right_child c e)
+  (set_left_child c d)
+  (merge_tree c r)
+  ; (print_tree (toroot r))
+  (fiveam:is (is_root r))
+ )
+
 
 
 (fiveam:run!)
