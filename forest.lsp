@@ -19,7 +19,7 @@
         (val :accessor val :initform -1000)
         (color :accessor color :initform "b")
         (children :accessor children :initform (cons nil nil))
-        (root :accessor root :initform nil)
+        (root :accessor root :initform (cons nil nil))
     )
 )
 
@@ -31,7 +31,7 @@
     (let* ((new (make-instance 'node)))
         (setf (color new) clr)
         (setf (val new) vl) 
-        (if (not (null rt)) (setf (root new) root))
+        (if (not (null rt)) (setf (root new) (cons rt nil)))
         (if (not (null ch)) (setf (children new) ch) (setf (children new) (cons (create_list) (create_list))))
         new
     )
@@ -49,7 +49,7 @@
 (defmethod toroot ((object node))
     (cond
         ((is_root object) object)
-        (T (toroot (root object)))
+        (T (toroot (car (root object))))
     )
 )
 
@@ -129,7 +129,7 @@
         (T     (and 
                     (tolistik new_val)
                     (rplaca (children object) new_val)
-                    (setf (root new_val) object)
+                    (rplaca (root new_val) object)
                     object
                 )
         )
@@ -147,8 +147,8 @@
         ((not (isnullnode (get_right_child object))) object)
         (T     (and 
                     (tolistik new_val)
-                    (setf (cdr (children object)) new_val)
-                    (setf (root new_val) object)
+                    (rplacd (children object) new_val)
+                    (rplaca (root new_val) object)
                     object
                 )
         )
@@ -185,7 +185,7 @@
 ;return: T - object is tree root
 ;        Nil - object isnt tree root
 (defmethod is_root ((object node))
-    (null (root object))
+    (null (car (root object)))
 )
 
 ;method insert
@@ -220,16 +220,16 @@
             (rr_grand    (copy-tree (get_right_grandson parent)))
           )
 
-            (setf (root rl_grand) parent)
-            (rplacd (children parent) rl_grand)
+            (rplaca (root rl_grand) parent)
 
-            (setf (root right_son) (root tmp_parent))
+            (rplacd (children parent) rl_grand)
+            (rplaca (root right_son) (car (root tmp_parent)))
             
             (cond ((is_root tmp_parent) right_son)
-                  ((equalp (get_left_child (root tmp_parent)) tmp_parent) (setf (car (children (root tmp_parent))) right_son))
-                  (T (rplacd (children (root tmp_parent)) right_son)))
+                  ((equalp (get_left_child (car (root tmp_parent))) tmp_parent) (rplaca (children (car (root tmp_parent))) right_son))
+                  (T (rplacd (children (car (root tmp_parent))) right_son)))
 
-            (setf (root parent) right_son)
+            (rplaca (root parent) right_son)
             (rplaca (children right_son) parent)
 
             right_son
@@ -254,17 +254,17 @@
             (lr_grand    (copy-tree (get_lr_grandson parent)))
         )
 
-            (setf (root lr_grand) parent)
-            (setf (car (children parent)) lr_grand)
+            (rplaca (root lr_grand) parent)
+            (rplaca (children parent) lr_grand)
 
-            (setf (root left_son) (root tmp_parent))
+            (rplaca (root left_son) (car (root tmp_parent)))
             
             (cond ((is_root tmp_parent) left_son)
-                  ((equalp (get_left_child (root tmp_parent)) tmp_parent) (setf (car (children (root tmp_parent))) left_son))
-                  (T (setf (cdr (children (root tmp_parent))) left_son)))
+                  ((equalp (get_left_child (car (root tmp_parent))) tmp_parent) (rplaca (children (car (root tmp_parent))) left_son))
+                  (T (rplacd (children (car (root tmp_parent))) left_son)))
 
-            (setf (root parent) left_son)
-            (setf (cdr (children left_son)) parent)
+            (rplaca (root parent) left_son)
+            (rplacd (children left_son) parent)
 
             left_son
     )
@@ -508,13 +508,13 @@
 ;return: node
 (defun case1_impl_left (parent)
     (cond ((is_root parent) (and (swap_color_red_up parent) (toblack parent)))
-          (T (and (swap_color_red_up parent) (balance_tree (root parent))))
+          (T (and (swap_color_red_up parent) (balance_tree (car (root parent)))))
     )
 )
 
 (defun case1_impl_right (parent)
     (cond ((is_root parent) (and (swap_color_red_up parent) (toblack parent)))
-          (T (and (swap_color_red_up parent) (balance_tree (root parent))))
+          (T (and (swap_color_red_up parent) (balance_tree (car (root parent)))))
     )
 )
 
@@ -523,7 +523,7 @@
 ;params: parent - current root of tree
 ;return: node
 (defun case2_impl_left (parent)
-    (let* ((root_of_parent (root parent)))
+    (let* ((root_of_parent (car (root parent))))
         (cond ((is_root parent)  (toblack (right_turn (small_left_turn parent))))
             (T (and (left_turn (get_left_child parent)) (right_turn parent)
                     (toblack (get_left_child root_of_parent))
@@ -538,7 +538,7 @@
 ;params: parent - current root of tree
 ;return: node
 (defun case2_impl_right (parent)
-    (let* ((root_of_parent (root parent)))
+    (let* ((root_of_parent (car (root parent))))
         (cond ((is_root parent) (toblack (left_turn (small_right_turn parent))))
             (T (and (right_turn (get_right_child parent)) (left_turn parent) 
                     (toblack (get_right_child root_of_parent))
@@ -553,7 +553,7 @@
 ;params: parent - current root of tree
 ;return: node
 (defun case3_impl_left (parent)
-    (let* ((root_of_parent (root parent)))
+    (let* ((root_of_parent (car (root parent))))
         (cond ((is_root parent) (toblack (left_turn parent)))
             (T (and (toblack (get_right_child parent))
                     (tored parent)
@@ -569,7 +569,7 @@
 ;params: parent - current root of tree
 ;return: node
 (defun case3_impl_right (parent)
-    (let* ((root_of_parent (root parent)))
+    (let* ((root_of_parent (car (root parent))))
         (cond ((is_root parent) (toblack (right_turn parent)))
             (T (and (toblack (get_left_child parent))
                     (tored parent)
@@ -587,8 +587,8 @@
 (defun balance_tree (parent)
     (cond 
             ((null parent)                            (and (print "nil") nil))
-            ((isnullnode parent)                      (and (print "nullnode") (balance_tree (root parent))))
-            ((and (islistik parent) (not (is_root parent)))                        (and (print "list") (balance_tree (root parent))))
+            ((isnullnode parent)                      (and (print "nullnode") (balance_tree (car (root parent)))))
+            ((and (islistik parent) (not (is_root parent)))                        (and (print "list") (balance_tree (car (root parent)))))
             ((case0 parent)                           (and (print "0") (case0_impl parent)))
             ((case1 parent)                           (and (print "1.1") (case1_impl_left parent)))
             ((case1_right parent)                     (and (print "1.2") (print parent) (case1_impl_right parent)))
@@ -596,7 +596,7 @@
             ((case2_right parent)                     (and (print "2.2") (case2_impl_right parent)))
             ((case3_left parent)                      (and (print "3.1") (case3_impl_right parent)))
             ((case3_right parent)                     (and (print "3.2") (case3_impl_left parent)))
-            (t                                        (and (print "4 - balanced") (balance_tree (root parent))))
+            (t                                        (and (print "4 - balanced") (balance_tree (car (root parent)))))
     )
 )
 
@@ -606,7 +606,7 @@
 (defun depth_trav (parent)
     (cond 
             ((null parent) 1)
-            ((islistik parent) (balance_tree (root (root parent))))
+            ((islistik parent) (balance_tree (car (root (car (root parent))))))
             (T (depth_trav (and (balance_tree (car (children parent))) (balance_tree (cadr (children parent))))))
     )
 )

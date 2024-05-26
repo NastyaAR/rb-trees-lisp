@@ -11,7 +11,7 @@
                 (equalp "b" (color a))
                 (equalp -1000 (val a))
                 (equalp (cons nil nil) (children a))
-                (null (root a)))))
+                (null (car (root a))))))
 
 (fiveam:test tored-test
   (setf a (make-instance 'node))
@@ -62,7 +62,7 @@
   (setf a (create_node 10 "r"))
   (set_left_child a c)
   (fiveam:is (and 
-                (equalp a (root c))
+                (equalp a (car (root c)))
                 (equalp c (get_left_child a))
                 (islistik c)
              )))   
@@ -74,7 +74,7 @@
   (set_left_child a c)
   (set_left_child a b)
   (fiveam:is (and 
-                (equalp a (root c))
+                (equalp a (car (root c)))
                 (equalp c (get_left_child a))
                 (islistik c)
              ))) 
@@ -88,7 +88,7 @@
   (setf a (create_node 10 "r"))
   (set_right_child a c)
   (fiveam:is (and 
-                (equalp a (root c))
+                (equalp a (car (root c)))
                 (equalp c (get_right_child a))
                 (islistik c)
              )))  
@@ -100,7 +100,7 @@
   (set_right_child a c)
   (set_right_child a b)
   (fiveam:is (and 
-                (equalp a (root c))
+                (equalp a (car (root c)))
                 (equalp c (get_right_child a))
                 (islistik c)
              ))) 
@@ -380,7 +380,8 @@
   (set_right_child r b)
   (set_left_child b c)
   (set_right_child b d)
-  (fiveam:is (equalp b (toroot (left_turn r)))))
+  (fiveam:is (equalp b (toroot (left_turn r))))
+  )
 
  (fiveam:test left-turn-normal-parent-and-son-test
   (setf r (create_node 20 "b"))
@@ -619,12 +620,12 @@
 
   (balance_tree m)
   (print_tree (toroot r))
-;   (fiveam:is (and 
-;                 (equalp r (toroot r))
-;                 (equalp "b" (color d))
-;                 (equalp "r" (color b))
-;                 (equalp "r" (color c))
-;              ))
+  ; (fiveam:is (and 
+  ;               (equalp r (toroot r))
+  ;               (equalp "b" (color d))
+  ;               (equalp "r" (color b))
+  ;               (equalp "r" (color c))
+  ;            ))
  )
 
 (fiveam:test insert-test
