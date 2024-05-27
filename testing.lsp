@@ -689,6 +689,23 @@
   (fiveam:is (is_root r))
  )
 
+(fiveam:test 1-test
+  (setf r (create_node 2 "b"))
+  (setf a (create_node 1 "b"))
+  (setf b (create_node 4 "b"))
+  (set_left_child r a)
+  (set_right_child r b)
+  (setf e (create_node 3 "r"))
+  (setf c (create_node 5 "r"))
+  (setf d (create_node 6 "r"))
+  (set_right_child b c)
+  (set_left_child b e)
+  (set_right_child c d)
+  (balance_tree d)
+  (print_tree (toroot d))
+  ; (fiveam:is (is_root r))
+ )
+
 
 
 (fiveam:run!)
